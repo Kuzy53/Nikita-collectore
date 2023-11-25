@@ -1,0 +1,17 @@
+body {
+    background-color: #9f5959;
+}
+
+h1 {
+    margin: 0 auto;
+    box-shadow: 1px 1px 1px 1px;
+    border: 2px #fff solid;
+    border-radius: 30px;
+    text-align: center;
+    width: 100px;
+    padding: 10px;
+}
+
+h1:hover {
+    box-shadow: 1px 1px 3px 4px #fff;
+}
