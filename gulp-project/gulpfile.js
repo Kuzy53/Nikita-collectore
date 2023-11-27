@@ -1,26 +1,49 @@
-const gulp = require('gulp')
-const fs = require('fs');
-const clean = require('gulp-clean');
+const gulp = require('gulp');
+const webpack = require('webpack-stream');
+const sass = require('gulp-sass')(require('sass'));
+const htmlmin = require('gulp-htmlmin');
+// let imagemin;
+
+import('gulp-imagemin').then((module) => {
+  imagemin = module;
+});
+
+// Задача для работы с JavaScript
+gulp.task('js', function() {
+    return gulp.src('src/index.js')
+        .pipe(webpack(require('./webpack.config.js')))
+        .pipe(gulp.dest('dist'));
+});
+
+// Задача для работы с CSS
+gulp.task('css', function() {
+    return gulp.src('src/scss/*.scss')
+        .pipe(sass().on('error', sass.logError))
+        .pipe(gulp.dest('dist/css'));
+});
+
+// Задача для работы с HTML
+gulp.task('html', function() {
+    return gulp.src('src/*.html')
+        .pipe(htmlmin({ collapseWhitespace: true }))
+        .pipe(gulp.dest('dist'));
+});
+
+// Задача для работы с изображениями
+gulp.task('img', function(done) {
+  import('gulp-imagemin').then((imagemin) => {
+      return gulp.src('src/img/*')
+          .pipe(imagemin.default())
+          .pipe(gulp.dest('dist/img'));
+  }).then(() => done(), (err) => done(err));
+});
 
 
-gulp.task("task1", function () {
-    console.log("tASK IS DONE")
-})
-
-gulp.task("watch:dev", function () {
-    gulp.watch("./src/*.js", gulp.parallel("task1"))
-})
-
-gulp.task('clean:dev', function (done) {
-    if (fs.existsSync('./dist/')) {
-      return gulp
-        .src('./dist/', { read: false })
-        .pipe(clean({ force: true }));
-    }
+// Задача по умолчанию
+gulp.task('default', gulp.series('js', 'css', 'html', 'img', function(done) {
+    gulp.watch('src/js/*.js', gulp.series('js'));
+    gulp.watch('src/scss/*.scss', gulp.series('css'));
+    gulp.watch('src/*.html', gulp.series('html'));
+    gulp.watch('src/img/*', gulp.series('img'));
     done();
-  });
-
-gulp.task("default", 
-gulp.series('clean:dev', gulp.parallel('task1'), gulp.parallel('watch:dev'))
-)
-  
+}));
